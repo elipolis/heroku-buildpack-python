@@ -1,96 +1,74 @@
-# Install python-ldap
-puts-step "Installing python-ldap"
+##############################################################
+# python ldap
+# http://bengillies.tiddlyspace.com/bags/bengillies_public/tiddlers/Python-LDAP%20and%20Oracle%20Enterprise%20Linux
+##############################################################
 
-#GROFF_VERSION=1.21
-#GROFF_URL=ftp://ftp.gnu.org/gnu/groff/groff-${GROFF_VERSION}.tar.gz
+cd $BUILD_DIR
 
-BERKLEY_DB_VERSION=5.3.15
-BERKLEY_DB_URL=http://download.oracle.com/berkeley-db/db-${BERKLEY_DB_VERSION}.NC.tar.gz
-
-OPENLDAP_VERSION=2.4.40
-OPENLDAP_URL=http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-${OPENLDAP_VERSION}.tgz
-
+if [ -d $CACHE_DIR/.python-ldap ]; then
+  cp -R $CACHE_DIR/.python-ldap .
+fi
+mkdir -p .python-ldap
 mkdir -p $CACHE_DIR/.python-ldap
-mkdir -p $BUILD_DIR/.python-ldap
 
-#if [ ! -d $CACHE_DIR/.python-ldap/lib-groff ]; then
-#    echo "Downloading Groff ${GROFF_VERSION} ..." | indent
-#    curl -s -L -o groff.tar.gz $GROFF_URL
-#    echo "Unpacking ..." | indent
-#    tar -zxvf groff.tar.gz > /dev/null
-#    rm groff.tar.gz
-#    mv groff-${GROFF_VERSION} $CACHE_DIR/.python-ldap/groff
-#    echo "Configuring ..." | indent
-#    cd $CACHE_DIR/.python-ldap/groff
-#    ./configure --prefix=$CACHE_DIR/.python-ldap/lib-groff > /dev/null
-#    echo "Compiling ..." | indent
-#    make PROCESSEDEXAMPLEFILES="" > /dev/null
-#    echo "Installing ..." | indent
-#    make PROCESSEDEXAMPLEFILES="" install > /dev/null
-#    cd - > /dev/null
-#fi
-#cp -R $CACHE_DIR/.python-ldap/lib-groff $BUILD_DIR/.python-ldap/lib-groff
-#export PATH=${BUILD_DIR}/.python-ldap/lib-groff/bin:${PATH}
-#echo "Groff enabled." | indent
-
-
-if [ ! -d $CACHE_DIR/.python-ldap/lib-berkleydb ]; then
-    echo "Downloading BerkleyDB ${BERKLEY_DB_VERSION} ..." | indent
-    curl -s -L -o berkleydb.tar.gz $BERKLEY_DB_URL
-    echo "Unpacking ..." | indent
-    tar -zxvf berkleydb.tar.gz > /dev/null
-    rm berkleydb.tar.gz
-    mv db-${BERKLEY_DB_VERSION}.NC $CACHE_DIR/.python-ldap/berkleydb
-    echo "Configuring ..." | indent
-    cd $CACHE_DIR/.python-ldap/berkleydb/build_unix
-    ../dist/configure --prefix=$CACHE_DIR/.python-ldap/lib-berkleydb > /dev/null
-    echo "Compiling ..." | indent
-    make > /dev/null
-    echo "Installing ..." | indent
-    make install > /dev/null
-    cd - > /dev/null
-fi
-cp -R $CACHE_DIR/.python-ldap/lib-berkleydb $BUILD_DIR/.python-ldap/lib-berkleydb
-export LD_LIBRARY_PATH="$BUILD_DIR/.python-ldap/lib-berkleydb/lib:${LD_LIBRARY_PATH}"
-echo "BerkleyDB enabled." | indent
-
-
-if [ ! -d $CACHE_DIR/.python-ldap/lib-openldap ]; then
-    echo "Downloading Open LDAP ${OPENLDAP_VERSION} ..." | indent
-    curl -s -L -o openldap.tgz $OPENLDAP_URL
-    echo "Unpacking ..." | indent
-    tar -zxvf openldap.tgz > /dev/null
-    rm openldap.tgz
-    mv openldap-${OPENLDAP_VERSION} $CACHE_DIR/.python-ldap/openldap
-    echo "Configuring ..." | indent
-    cd $CACHE_DIR/.python-ldap/openldap
-    LDFLAGS="-L$BUILD_DIR/.python-ldap/lib-berkleydb/lib ${LDFLAGS}" CPPFLAGS="-I$BUILD_DIR/.python-ldap/lib-berkleydb/include ${CPPFLAGS}" ./configure --enable-bdb --enable-crypt --with-tls=openssl --prefix=$CACHE_DIR/.python-ldap/lib-openldap > /dev/null
-    echo "Compiling ..." | indent
-    make depend > /dev/null
-    make > /dev/null
-    echo "Installing ..." | indent
-    make install > /dev/null
-    cd - > /dev/null
-fi
-cp -R $CACHE_DIR/.python-ldap/lib-openldap $BUILD_DIR/.python-ldap/lib-openldap
-echo "Open LDAP enabled." | indent
-
-echo "Installing python-ldap ..." | indent
-PYTHON_LDAP_VERSION=`cat requirements.txt | grep python-ldap | awk -F '=' '{ print $3 }'`
-
-mkdir tmpdir
-if [ -n "$PYTHON_LDAP_VERSION" ]; then
-    pip install -d tmpdir python-ldap==${PYTHON_LDAP_VERSION}
-else
-    pip install -d tmpdir python-ldap
-    PYTHON_LDAP_VERSION=`ls tmpdir | grep python-ldap | sed 's/python-ldap-\(.*\)\.tar\.gz/\1/g'`
+# Install python-ldap
+if [ ! -d $BUILD_DIR/.python-ldap/groff ]; then
+  echo "-----> Installing Groff"
+  curl -O ftp://ftp.gnu.org/gnu/groff/groff-1.21.tar.gz
+  tar -zxvf groff-1.21.tar.gz
+  cd groff-1.21
+  ./configure --prefix=$BUILD_DIR/.python-ldap/groff
+  make PROCESSEDEXAMPLEFILES=""
+  make PROCESSEDEXAMPLEFILES="" install
+  cd $BUILD_DIR
+  cp -R .python-ldap/groff $CACHE_DIR/.python-ldap
 fi
 
-cd tmpdir
-tar -zxvf python-ldap-${PYTHON_LDAP_VERSION}.tar.gz > /dev/null
-cd python-ldap-${PYTHON_LDAP_VERSION}
-sed "s,library_dirs = \(.*\),library_dirs = $BUILD_DIR/.python-ldap/lib-openldap/lib \1,g" setup.cfg > setup.cfg
-sed "s,include_dirs = \(.*\),include_dirs = $BUILD_DIR/.python-ldap/lib-openldap/include \1,g" setup.cfg > setup.cfg
-pip install .
-cd ../..
-rm -rf tmpdir
+echo "-----> Adding soelim to path"
+export PATH=$PATH:$BUILD_DIR/.python-ldap/groff/bin
+
+if [ ! -d $BUILD_DIR/.python-ldap/db4 ]; then
+  echo "-----> Installing BerkeleyDB"
+  curl -O http://download.oracle.com/berkeley-db/db-4.8.24.NC.tar.gz
+  tar -zxvf db-4.8.24.NC.tar.gz
+  cd db-4.8.24.NC
+  cd build_unix
+  ../dist/configure --prefix=$BUILD_DIR/.python-ldap/db4
+  make
+  make install
+  cd $BUILD_DIR
+  cp -R .python-ldap/db4 $CACHE_DIR/.python-ldap
+fi
+
+echo "-----> Changing library paths"
+export LD_LIBRARY_PATH="/usr/lib:/usr/local/lib:$BUILD_DIR/.python-ldap/db4/lib:/usr/local/ssl/lib"
+export LDFLAGS="-L/usr/local/lib -L$BUILD_DIR/.python-ldap/db4/lib -L/usr/local/ssl/lib"
+export CPPFLAGS="-I/usr/local/include -I$BUILD_DIR/.python-ldap/db4/include -I/usr/local/ssl/include"
+echo $LD_LIBRARY_PATH
+echo $LDFLAGS
+echo $CPPFLAGS
+
+if [ ! -d $BUILD_DIR/.python-ldap/openldap ]; then
+  echo "-----> Fetching and installing openldap"
+  curl -O http://www.openldap.org/software/download/OpenLDAP/openldap-release/openldap-2.4.33.tgz >/dev/null 2>&1
+  echo "-----> Extracting ..."
+  tar -xvf openldap-2.4.33.tgz
+  echo "-----> Moving ..."
+  echo "-----> Change directories ..."
+  cd openldap-2.4.33
+  echo "-----> Configuring ..."
+  ./configure --enable-bdb --enable-crypt --with-tls=openssl --prefix=$BUILD_DIR/.python-ldap/openldap
+  echo "-----> Installing ..."
+  make depend
+  make
+  #make test
+  make install
+  echo "openldap installed" | indent
+  cd $BUILD_DIR
+  cp -R .python-ldap/openldap $CACHE_DIR/.python-ldap
+fi
+
+##############################################################
+# / python ldap
+##############################################################
+
