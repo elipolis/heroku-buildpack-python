@@ -1,8 +1,8 @@
 # Install python-ldap
 puts-step "Installing python-ldap"
 
-GROFF_VERSION=1.21
-GROFF_URL=ftp://ftp.gnu.org/gnu/groff/groff-${GROFF_VERSION}.tar.gz
+#GROFF_VERSION=1.21
+#GROFF_URL=ftp://ftp.gnu.org/gnu/groff/groff-${GROFF_VERSION}.tar.gz
 
 BERKLEY_DB_VERSION=5.3.15
 BERKLEY_DB_URL=http://download.oracle.com/berkeley-db/db-${BERKLEY_DB_VERSION}.NC.tar.gz
@@ -13,22 +13,22 @@ OPENLDAP_URL=http://www.openldap.org/software/download/OpenLDAP/openldap-release
 mkdir -p $CACHE_DIR/.python-ldap
 mkdir -p $BUILD_DIR/.python-ldap
 
-if [ ! -d $CACHE_DIR/.python-ldap/lib-groff ]; then
-    echo "Downloading Groff ${GROFF_VERSION} ..." | indent
-    curl -s -L -o groff.tar.gz $GROFF_URL
-    echo "Unpacking ..." | indent
-    tar -zxvf groff.tar.gz > /dev/null
-    rm groff.tar.gz
-    mv groff-${GROFF_VERSION} $CACHE_DIR/.python-ldap/groff
-    echo "Configuring ..." | indent
-    cd $CACHE_DIR/.python-ldap/groff
-    ./configure --prefix=$CACHE_DIR/.python-ldap/lib-groff > /dev/null
-    echo "Compiling ..." | indent
-    make PROCESSEDEXAMPLEFILES="" > /dev/null
-    echo "Installing ..." | indent
-    make PROCESSEDEXAMPLEFILES="" install > /dev/null
-    cd - > /dev/null
-fi
+#if [ ! -d $CACHE_DIR/.python-ldap/lib-groff ]; then
+#    echo "Downloading Groff ${GROFF_VERSION} ..." | indent
+#    curl -s -L -o groff.tar.gz $GROFF_URL
+#    echo "Unpacking ..." | indent
+#    tar -zxvf groff.tar.gz > /dev/null
+#    rm groff.tar.gz
+#    mv groff-${GROFF_VERSION} $CACHE_DIR/.python-ldap/groff
+#    echo "Configuring ..." | indent
+#    cd $CACHE_DIR/.python-ldap/groff
+#    ./configure --prefix=$CACHE_DIR/.python-ldap/lib-groff > /dev/null
+#    echo "Compiling ..." | indent
+#    make PROCESSEDEXAMPLEFILES="" > /dev/null
+#    echo "Installing ..." | indent
+#    make PROCESSEDEXAMPLEFILES="" install > /dev/null
+#    cd - > /dev/null
+#fi
 cp -R $CACHE_DIR/.python-ldap/lib-groff $BUILD_DIR/.python-ldap/lib-groff
 export PATH=${BUILD_DIR}/.python-ldap/lib-groff/bin:${PATH}
 echo "Groff enabled." | indent
