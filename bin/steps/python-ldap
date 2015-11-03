@@ -29,9 +29,9 @@ mkdir -p $BUILD_DIR/.python-ldap
 #    make PROCESSEDEXAMPLEFILES="" install > /dev/null
 #    cd - > /dev/null
 #fi
-cp -R $CACHE_DIR/.python-ldap/lib-groff $BUILD_DIR/.python-ldap/lib-groff
-export PATH=${BUILD_DIR}/.python-ldap/lib-groff/bin:${PATH}
-echo "Groff enabled." | indent
+#cp -R $CACHE_DIR/.python-ldap/lib-groff $BUILD_DIR/.python-ldap/lib-groff
+#export PATH=${BUILD_DIR}/.python-ldap/lib-groff/bin:${PATH}
+#echo "Groff enabled." | indent
 
 
 if [ ! -d $CACHE_DIR/.python-ldap/lib-berkleydb ]; then
